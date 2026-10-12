@@ -1,26 +1,29 @@
 # Gesture Scroll
 
-Kontrol scroll layar menggunakan gerakan tangan di depan webcam. Aplikasi memakai
-MediaPipe untuk mendeteksi 21 landmark tangan dan PyAutoGUI untuk mengirim perintah
-scroll ke aplikasi yang sedang aktif.
+Control screen scrolling with real-time hand gestures captured through a webcam.
+The application uses MediaPipe to detect 21 hand landmarks and PyAutoGUI to send
+scroll commands to the application under the mouse pointer.
 
-## Gesture
+## How It Works
 
-1. Arahkan satu tangan ke webcam.
-2. Rapatkan ujung jempol dan telunjuk untuk mengaktifkan mode scroll.
-3. Sambil tetap pinch, gerakkan tangan ke atas atau bawah.
-4. Lepaskan pinch untuk menghentikan scroll.
+1. Hold one hand in front of the webcam.
+2. Bring your thumb and index fingertip together to activate scrolling.
+3. Keep pinching while moving your hand up or down.
+4. Release the pinch to stop scrolling.
 
-Gerakan tangan ke atas menghasilkan scroll ke atas; gerakan ke bawah menghasilkan
-scroll ke bawah.
+Moving your hand up scrolls up, while moving it down scrolls down. Motion
+smoothing, a configurable dead zone, and a short cooldown help prevent jitter
+and unintended scrolling.
 
-## Persyaratan
+## Requirements
 
-- Python 3.9 atau lebih baru
-- Webcam
-- macOS, Windows, atau Linux dengan desktop GUI
+- Python 3.9 or newer
+- A webcam
+- macOS, Windows, or Linux with a desktop environment
 
-## Instalasi
+## Installation
+
+Create a virtual environment and install the project:
 
 ```bash
 python3 -m venv .venv
@@ -29,94 +32,104 @@ python -m pip install --upgrade pip
 pip install -e .
 ```
 
-Windows PowerShell menggunakan aktivasi berikut:
+On Windows PowerShell, activate the virtual environment with:
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-## Menjalankan
+## Usage
 
-Uji deteksi dahulu tanpa mengendalikan layar:
+Start in dry-run mode to test hand detection without controlling the screen:
 
 ```bash
 gesture-scroll --dry-run
 ```
 
-Jika deteksi sudah sesuai, jalankan mode normal:
+Once detection works correctly, start the application normally:
 
 ```bash
 gesture-scroll
 ```
 
-Model Hand Landmarker akan diunduh otomatis ke `models/` pada pemakaian pertama.
-Tekan `Q` pada jendela kamera untuk keluar.
+The MediaPipe Hand Landmarker model is downloaded automatically to `models/`
+the first time the application starts. Focus the camera window and press `Q`,
+`q`, or `Esc` to exit. You can also press `Ctrl+C` in the terminal.
 
-Alternatif tanpa memasang command entry point:
+To run the project without installing its command-line entry point:
 
 ```bash
 PYTHONPATH=src python -m gesture_scroll --dry-run
 ```
 
-## Izin sistem
+## System Permissions
 
 ### macOS
 
-Berikan izin kepada Terminal atau aplikasi Python pada:
+Grant Terminal, Visual Studio Code, or whichever application launches the
+project access to:
 
 - **System Settings → Privacy & Security → Camera**
 - **System Settings → Privacy & Security → Accessibility**
 
-Izin Camera diperlukan untuk membaca webcam. Izin Accessibility diperlukan agar
-PyAutoGUI dapat mengirim perintah scroll.
+Camera permission allows the application to read webcam frames. Accessibility
+permission allows PyAutoGUI to send scroll commands. Quit and reopen the
+terminal application after changing these permissions.
 
 ### Windows
 
-Pastikan akses kamera untuk desktop apps aktif melalui **Settings → Privacy &
-security → Camera**.
+Make sure camera access for desktop applications is enabled under **Settings →
+Privacy & security → Camera**.
 
-## Pengaturan sensitivitas
+## Configuration
 
-Contoh:
+Example with increased sensitivity:
 
 ```bash
 gesture-scroll --sensitivity 160 --dead-zone 0.009 --smoothing 0.4
 ```
 
-Opsi penting:
+Available options:
 
-| Opsi | Default | Fungsi |
+| Option | Default | Description |
 |---|---:|---|
-| `--camera` | `0` | Memilih indeks webcam |
-| `--pinch-threshold` | `0.45` | Nilai lebih besar membuat pinch lebih mudah aktif |
-| `--sensitivity` | `120` | Kekuatan scroll |
-| `--dead-zone` | `0.012` | Batas gerakan kecil yang diabaikan |
-| `--smoothing` | `0.35` | Perataan gerakan, rentang 0–1 |
-| `--cooldown` | `0.06` | Jeda minimum antar-scroll dalam detik |
-| `--max-scroll` | `6` | Batas scroll per pembaruan |
-| `--dry-run` | mati | Deteksi saja tanpa mengontrol layar |
+| `--camera` | `0` | Webcam device index |
+| `--pinch-threshold` | `0.45` | Higher values make the pinch easier to activate |
+| `--sensitivity` | `120` | Scroll strength |
+| `--dead-zone` | `0.012` | Minimum movement before scrolling begins |
+| `--smoothing` | `0.35` | Motion smoothing factor between 0 and 1 |
+| `--cooldown` | `0.06` | Minimum delay between scroll events, in seconds |
+| `--max-scroll` | `6` | Maximum scroll amount per update |
+| `--dry-run` | off | Run detection without controlling the screen |
 
-Jika scroll terlalu sensitif, turunkan `--sensitivity` atau naikkan `--dead-zone`.
-Jika scroll terasa lambat, lakukan kebalikannya.
+If scrolling is too sensitive, lower `--sensitivity` or increase
+`--dead-zone`. If scrolling feels slow, do the opposite.
 
-## Pengujian
+## Testing
+
+Install the development dependencies and run the test suite:
 
 ```bash
 pip install -e '.[dev]'
 pytest
 ```
 
-Pengujian mencakup aktivasi pinch, arah scroll, dead zone, dan reset ketika tangan
-tidak terdeteksi.
+The tests cover pinch activation, scroll direction, dead-zone behavior, input
+validation, and controller reset when no hand is detected.
 
-## Pemecahan masalah
+## Troubleshooting
 
-- **Kamera tidak terbuka atau frame tidak terbaca:** tutup FaceTime, Zoom, browser,
-  atau aplikasi lain yang sedang memakai kamera. Setelah itu coba
-  `gesture-scroll --dry-run` atau `gesture-scroll --camera 1 --dry-run`.
-- **Deteksi bekerja tetapi layar tidak scroll:** aktifkan izin Accessibility dan
-  pastikan kursor berada di atas aplikasi yang ingin di-scroll.
-- **Scroll bergerak sendiri:** naikkan `--dead-zone`, misalnya menjadi `0.02`.
-- **Pinch sulit aktif:** naikkan `--pinch-threshold`, misalnya menjadi `0.55`.
-- **Jendela tersendat:** tutup aplikasi lain yang memakai webcam dan gunakan
-  pencahayaan yang lebih terang.
+- **The camera does not open or frames cannot be read:** Close FaceTime, Zoom,
+  browser tabs, or any other application using the webcam. Then try
+  `gesture-scroll --dry-run` or `gesture-scroll --camera 1 --dry-run`.
+- **Detection works but the screen does not scroll:** Enable Accessibility
+  permission and place the mouse pointer over the application you want to
+  scroll.
+- **The screen scrolls without intentional movement:** Increase `--dead-zone`,
+  for example to `0.02`.
+- **The pinch is difficult to activate:** Increase `--pinch-threshold`, for
+  example to `0.55`.
+- **The camera window is lagging:** Close other applications using the webcam
+  and improve the lighting around your hand.
+- **`Q` does not close the application:** Click the camera window before
+  pressing `Q`, or press `Ctrl+C` in the terminal.
