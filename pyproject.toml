@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gesture-scroll"
+version = "0.1.0"
+description = "Kontrol scroll layar dengan gesture tangan melalui webcam"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "mediapipe>=0.10.14",
+  "opencv-contrib-python>=4.10.0",
+  "PyAutoGUI>=0.9.54",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[project.scripts]
+gesture-scroll = "gesture_scroll.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
